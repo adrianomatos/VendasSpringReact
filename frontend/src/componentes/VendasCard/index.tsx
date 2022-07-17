@@ -1,0 +1,93 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Sale } from "../../models/sale";
+import { BASE_URL } from "../../utils/request";
+import BotaoNotificacao from '../BotaoNotificacao';
+import './style.css';
+
+function VendasCard() {
+
+    const min = new Date(new Date().setDate(new Date().getDate() - 31));
+    const max = new Date();
+
+    const [minDate, setMinDate] = useState(min);
+    const [maxDate, setMaxDate] = useState(max);
+
+    const [sales, setSales] = useState<Sale[]>([]);
+
+    useEffect(() => {
+
+        const dmin = minDate.toISOString().slice(0, 10);
+        const dmax = maxDate.toISOString().slice(0, 10);
+
+
+        axios.get(`${BASE_URL}/sales?minDate=${dmin}&maxDate=${dmax}`)
+        .then(response => {
+            setSales(response.data.content);
+        })
+    }, [minDate, maxDate])
+
+    return (
+        <div className="card">
+            <h2 className="vendas-titulo">Vendas</h2>
+
+            <div>
+                <div className="form-control-container">
+                    <DatePicker
+                        selected={minDate}
+                        onChange={(date: Date) => setMinDate(date)}
+                        className="form-control"
+                        dateFormat="dd/MM/yyyy"
+                    />
+                </div>
+                <div className="form-control-container">
+                    <DatePicker
+                        selected={maxDate}
+                        onChange={(date: Date) => setMaxDate(date)}
+                        className="form-control"
+                        dateFormat="dd/MM/yyyy"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <table className="vendas-tabela">
+                    <thead>
+                        <tr>
+                            <th className="exibeCom992">ID</th>
+                            <th className="exibeCom576">Data</th>
+                            <th>Vendedor</th>
+                            <th className="exibeCom992">Visitas</th>
+                            <th className="exibeCom992">Vendas</th>
+                            <th>Total</th>
+                            <th>Notificar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {sales.map(sale => {
+                            return (
+                                <tr key={sale.id}>
+                                    <td className="exibeCom992">{sale.id}</td>
+                                    <td className="exibeCom576">{new Date(sale.date).toLocaleDateString()}</td>
+                                    <td>{sale.sellerName}</td>
+                                    <td className="exibeCom992">{sale.visited}</td>
+                                    <td className="exibeCom992">{sale.deals}</td>
+                                    <td>R$ {sale.amount.toFixed(2)}</td>
+                                    <td>
+                                        <div className="botao-vermelho-container">
+                                            <BotaoNotificacao saleId={sale.id}/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    )
+}
+
+export default VendasCard;
