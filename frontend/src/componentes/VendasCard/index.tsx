@@ -9,7 +9,7 @@ import './style.css';
 
 function VendasCard() {
 
-    const min = new Date(new Date().setDate(new Date().getDate() - 31));
+    const min = new Date(new Date().setDate(new Date().getDate() - 400));
     const max = new Date();
 
     const [minDate, setMinDate] = useState(min);
